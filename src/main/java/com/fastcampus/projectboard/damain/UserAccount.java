@@ -36,8 +36,8 @@ public class UserAccount extends AuditingFields {
         this.email = email;
         this.nickname = nickname;
         this.memo = memo;
-        this.createdBy = createdBy;
-        this.modifiedBy = createdBy;
+//        this.createdBy = createdBy;
+//        this.modifiedBy = createdBy;
     }
 
     public static UserAccount of(String userId, String userPassword, String email, String nickname, String memo) {
