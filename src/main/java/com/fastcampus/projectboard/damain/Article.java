@@ -1,27 +1,19 @@
 package com.fastcampus.projectboard.damain;
 
-//import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-
 @Getter
-@ToString
+@ToString(callSuper = true)
 @Table(indexes = {
         @Index(columnList = "title"),
-        @Index(columnList = "hashtag"),
         @Index(columnList = "createdAt"),
         @Index(columnList = "createdBy")
 })
@@ -32,11 +24,22 @@ public class Article extends AuditingFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
+    @JoinColumn(name = "userId")
+    @ManyToOne(optional = false)
+    private UserAccount userAccount; // 유저 정보 (ID)
 
     @Setter @Column(nullable = false) private String title; // 제목
     @Setter @Column(nullable = false, length = 10000) private String content; // 본문
 
-    @Setter private String hashtag;
+    @ToString.Exclude
+    @JoinTable(
+            name = "article_hashtag",
+            joinColumns = @JoinColumn(name = "articleId"),
+            inverseJoinColumns = @JoinColumn(name = "hashtagId")
+    )
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Hashtag> hashtags = new LinkedHashSet<>();
 
 
     @ToString.Exclude
@@ -47,25 +50,38 @@ public class Article extends AuditingFields {
 
     protected Article() {}
 
-    private Article(String title, String content, String hashtag) {
+    private Article(UserAccount userAccount, String title, String content) {
+        this.userAccount = userAccount;
         this.title = title;
         this.content = content;
-        this.hashtag = hashtag;
     }
 
-    private static Article of(String title, String content, String hashtag) {
-        return new Article(title,content,hashtag);
+    public static Article of(UserAccount userAccount, String title, String content) {
+        return new Article(userAccount, title, content);
+    }
+
+    public void addHashtag(Hashtag hashtag) {
+        this.getHashtags().add(hashtag);
+    }
+
+    public void addHashtags(Collection<Hashtag> hashtags) {
+        this.getHashtags().addAll(hashtags);
+    }
+
+    public void clearHashtags() {
+        this.getHashtags().clear();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Article article)) return false;
-        return id !=null && id.equals(article.id);
+        if (!(o instanceof Article that)) return false;
+        return this.getId() != null && this.getId().equals(that.getId());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.getId());
     }
+
 }

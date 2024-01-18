@@ -1,7 +1,9 @@
 package com.fastcampus.projectboard.controller;
 
 
-import com.fastcampus.projectboard.config.SecurityConfig;
+import com.fastcampus.projectboard.config.TestSecurityConfig;
+import com.fastcampus.projectboard.service.ArticleService;
+import com.fastcampus.projectboard.service.PaginationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +19,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @DisplayName("View 컨트롤러 - 인증")
-@Import(SecurityConfig.class)
-@WebMvcTest
-public class AuthControllerTest {
+@Import(TestSecurityConfig.class)
+@WebMvcTest(AuthControllerTest.EmptyController.class)
+class AuthControllerTest {
 
     private final MockMvc mvc;
 
-//    @MockBean private ArticleService articleService;
-//    @MockBean
-//    private PaginationService paginationService;
+    @MockBean private ArticleService articleService;
+    @MockBean private PaginationService paginationService;
 
     AuthControllerTest(@Autowired MockMvc mvc) {
         this.mvc = mvc;
@@ -43,16 +43,15 @@ public class AuthControllerTest {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
-//        then(articleService).shouldHaveNoInteractions();
-//        then(paginationService).shouldHaveNoInteractions();
+        then(articleService).shouldHaveNoInteractions();
+        then(paginationService).shouldHaveNoInteractions();
     }
 
 
-//    /**
-//     * 어떤 컨트롤러도 필요하지 않은 테스트임을 나타내기 위해 테스트용 빈 컴포넌트를 사용함.
-//     */
-//    @TestComponent
-//    static class EmptyController {}
-
+    /**
+     * 어떤 컨트롤러도 필요하지 않은 테스트임을 나타내기 위해 테스트용 빈 컴포넌트를 사용함.
+     */
+    @TestComponent
+    static class EmptyController {}
 
 }
